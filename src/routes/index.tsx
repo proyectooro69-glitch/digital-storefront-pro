@@ -9,10 +9,10 @@ import type { Product } from '@/types'
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Premium Digital Products · Storefront Pro' },
-      { name: 'description', content: 'Premium digital products store. Buy ebooks, code, design assets, and more with instant download.' },
-      { property: 'og:title', content: 'Premium Digital Products' },
-      { property: 'og:description', content: 'Ebooks, code, design assets — instant download after purchase.' },
+      { title: 'Arte Digital Premium · Storefront Pro' },
+      { name: 'description', content: 'Arte digital premium para decorar tu hogar. Colecciones de imágenes en alta resolución listas para descargar, imprimir y enmarcar.' },
+      { property: 'og:title', content: 'Arte Digital Premium para tu Hogar' },
+      { property: 'og:description', content: 'Colecciones exclusivas de imágenes en alta resolución listas para descargar, imprimir y enmarcar.' },
     ],
   }),
   component: StorefrontHome,
@@ -61,15 +61,15 @@ function StorefrontHome() {
           <div className="flex flex-col items-center text-center gap-6">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/10 text-primary text-sm font-medium">
               <Package className="h-3.5 w-3.5" />
-              Digital Downloads
+              Arte Digital Descargable
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground font-[family-name:var(--font-serif)] tracking-tight max-w-3xl leading-tight">
-              Premium Digital Products
+              Arte Digital Premium para tu Hogar
             </h1>
 
             <p className="text-lg sm:text-xl text-muted-foreground max-w-xl leading-relaxed">
-              Ebooks, code, design assets — instant download after purchase
+              Colecciones exclusivas de imágenes en alta resolución listas para descargar, imprimir y enmarcar.
             </p>
 
             <div className="flex items-center gap-3 pt-2">
@@ -95,7 +95,7 @@ function StorefrontHome() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
             <Input
               type="text"
-              placeholder="Search products..."
+              placeholder="Buscar arte digital..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-10 h-11 rounded-xl"
@@ -253,7 +253,15 @@ function StorefrontHome() {
             <Store className="h-4 w-4 text-primary" />
             <span>Digital Storefront Pro</span>
           </div>
-          <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
+          <div className="flex items-center gap-5">
+            <Link
+              to="/_app/admin"
+              className="text-xs text-muted-foreground/60 hover:text-primary/70 transition-colors"
+            >
+              Admin
+            </Link>
+            <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>

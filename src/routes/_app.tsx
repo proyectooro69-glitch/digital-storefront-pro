@@ -46,7 +46,8 @@ function AppLayout() {
     navigate({ to: '/' })
   }
 
-  const isAdmin = user.email === 'admin@storefront.pro' // Can be extended with RBAC
+  // Solo owner store — any authenticated user is the admin (single-owner model)
+  const isAdmin = true
 
   return (
     <div className="min-h-screen bg-background">
