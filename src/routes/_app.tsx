@@ -10,7 +10,7 @@ export const Route = createFileRoute('/_app')({
 })
 
 function AppLayout() {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, isAdmin } = useAuth()
   const navigate = useNavigate()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -46,9 +46,7 @@ function AppLayout() {
     navigate({ to: '/' })
   }
 
-  // Solo owner store — any authenticated user is the admin (single-owner model)
-  const isAdmin = true
-
+  // ── Navigation ──
   return (
     <div className="min-h-screen bg-background">
       {/* Top Navbar */}

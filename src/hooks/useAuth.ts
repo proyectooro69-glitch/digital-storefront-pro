@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { blink } from '@/blink/client'
 import type { BlinkUser } from '@blinkdotnew/sdk'
+import { isAdminEmail } from '@/config/admin'
 
 export function useAuth() {
   const [user, setUser] = useState<BlinkUser | null>(null)
@@ -14,5 +15,7 @@ export function useAuth() {
     return unsubscribe
   }, [])
 
-  return { user, isLoading, isAuthenticated: !!user }
+  const isAdmin = useMemo(() => isAdminEmail(user?.email), [user?.email])
+
+  return { user, isLoading, isAuthenticated: !!user, isAdmin }
 }

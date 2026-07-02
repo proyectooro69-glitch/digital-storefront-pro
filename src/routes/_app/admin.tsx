@@ -1,12 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { blink } from '@/blink/client'
 import { Page, PageHeader, PageTitle, PageBody, Card, CardContent, Badge, Button, Skeleton } from '@blinkdotnew/ui'
 import { Shield, ShoppingBag, DollarSign, TrendingUp, Package, ArrowRight, BarChart3, Receipt } from 'lucide-react'
 import type { Order, Product } from '@/types'
+import { isAdminEmail } from '@/config/admin'
 
 export const Route = createFileRoute('/_app/admin')({
+  beforeLoad: async ({ context }) => {
+    // Wait for auth to resolve before checking
+    const user = blink.auth.isAuthenticated() ? await blink.auth.me().catch(() => null) : null
+    if (!isAdminEmail(user?.email)) {
+      throw redirect({ to: '/_app/dashboard' })
+    }
+  },
   component: AdminDashboard,
 })
 
