@@ -24,6 +24,9 @@ export interface Order {
   amount: number
   status: 'pending' | 'completed' | 'failed'
   webhook_data: string
+  buyer_name: string
+  buyer_email: string
+  email_sent: number
   created_at: string
   updated_at: string
 }
