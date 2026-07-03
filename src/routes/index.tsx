@@ -255,7 +255,7 @@ function StorefrontHome() {
           </div>
           <div className="flex items-center gap-5">
             <Link
-              to="/_app/admin"
+              to="/admin"
               className="text-xs text-muted-foreground/60 hover:text-primary/70 transition-colors"
             >
               Admin

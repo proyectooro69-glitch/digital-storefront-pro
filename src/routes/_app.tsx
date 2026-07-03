@@ -59,11 +59,11 @@ function AppLayout() {
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
-            <Link to="/_app/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <Link to="/dashboard" className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
               <ShoppingBag className="h-4 w-4" /> My Orders
             </Link>
             {isAdmin && (
-              <Link to="/_app/admin" className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-accent hover:bg-secondary transition-colors">
+              <Link to="/admin" className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-accent hover:bg-secondary transition-colors">
                 <Shield className="h-4 w-4" /> Admin
               </Link>
             )}
@@ -91,7 +91,7 @@ function AppLayout() {
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-background px-4 py-2 space-y-1">
             <Link
-              to="/_app/dashboard"
+              to="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
@@ -99,7 +99,7 @@ function AppLayout() {
             </Link>
             {isAdmin && (
               <Link
-                to="/_app/admin"
+                to="/admin"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center gap-2 px-2 py-2 rounded-md text-sm text-muted-foreground hover:text-accent hover:bg-secondary transition-colors"
               >
