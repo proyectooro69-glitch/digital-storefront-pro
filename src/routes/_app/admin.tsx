@@ -12,7 +12,7 @@ export const Route = createFileRoute('/_app/admin')({
   beforeLoad: async () => {
     const user = blink.auth.isAuthenticated() ? await blink.auth.me().catch(() => null) : null
     if (!isAdminEmail(user?.email)) {
-      throw redirect({ to: '/_app/dashboard' })
+      throw redirect({ to: '/dashboard' })
     }
   },
   component: AdminDashboard,
@@ -265,7 +265,7 @@ function AdminDashboard() {
         {/* ── Quick Nav Cards ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <Link
-            to="/_app/admin/products"
+            to="/admin/products"
             className="group flex items-center gap-4 rounded-xl border border-border bg-card p-5
               transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:bg-card/80 active:scale-[0.98]"
           >
@@ -277,7 +277,7 @@ function AdminDashboard() {
             <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-primary" />
           </Link>
           <Link
-            to="/_app/admin/orders"
+            to="/admin/orders"
             className="group flex items-center gap-4 rounded-xl border border-border bg-card p-5
               transition-all duration-300 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 hover:bg-card/80 active:scale-[0.98]"
           >
@@ -299,7 +299,7 @@ function AdminDashboard() {
                 Recent Orders
               </h3>
               <Link
-                to="/_app/admin/orders"
+                to="/admin/orders"
                 className="text-xs text-primary hover:text-primary/80 transition-colors font-medium flex items-center gap-1"
               >
                 View all <ArrowRight className="h-3 w-3" />

@@ -18,7 +18,7 @@ export const Route = createFileRoute('/_app/admin/products')({
   beforeLoad: async () => {
     const user = blink.auth.isAuthenticated() ? await blink.auth.me().catch(() => null) : null
     if (!isAdminEmail(user?.email)) {
-      throw redirect({ to: '/_app/dashboard' })
+      throw redirect({ to: '/dashboard' })
     }
   },
   component: AdminProducts,
