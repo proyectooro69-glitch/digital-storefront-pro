@@ -16,6 +16,7 @@ import { Route as CheckoutSuccessRouteImport } from './routes/checkout.success'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppAdminRouteImport } from './routes/_app/admin'
 import { Route as AppAdminProductsRouteImport } from './routes/_app/admin/products'
+import { Route as AppAdminOrdersRouteImport } from './routes/_app/admin/orders'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -51,6 +52,11 @@ const AppAdminProductsRoute = AppAdminProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AppAdminRoute,
 } as any)
+const AppAdminOrdersRoute = AppAdminOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AppAdminRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/products/$id': typeof ProductsIdRoute
+  '/admin/orders': typeof AppAdminOrdersRoute
   '/admin/products': typeof AppAdminProductsRoute
 }
 export interface FileRoutesByTo {
@@ -66,6 +73,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/products/$id': typeof ProductsIdRoute
+  '/admin/orders': typeof AppAdminOrdersRoute
   '/admin/products': typeof AppAdminProductsRoute
 }
 export interface FileRoutesById {
@@ -76,6 +84,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/checkout/success': typeof CheckoutSuccessRoute
   '/products/$id': typeof ProductsIdRoute
+  '/_app/admin/orders': typeof AppAdminOrdersRoute
   '/_app/admin/products': typeof AppAdminProductsRoute
 }
 export interface FileRouteTypes {
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/checkout/success'
     | '/products/$id'
+    | '/admin/orders'
     | '/admin/products'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -94,6 +104,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/checkout/success'
     | '/products/$id'
+    | '/admin/orders'
     | '/admin/products'
   id:
     | '__root__'
@@ -103,6 +114,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/checkout/success'
     | '/products/$id'
+    | '/_app/admin/orders'
     | '/_app/admin/products'
   fileRoutesById: FileRoutesById
 }
@@ -164,14 +176,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAdminProductsRouteImport
       parentRoute: typeof AppAdminRoute
     }
+    '/_app/admin/orders': {
+      id: '/_app/admin/orders'
+      path: '/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AppAdminOrdersRouteImport
+      parentRoute: typeof AppAdminRoute
+    }
   }
 }
 
 interface AppAdminRouteChildren {
+  AppAdminOrdersRoute: typeof AppAdminOrdersRoute
   AppAdminProductsRoute: typeof AppAdminProductsRoute
 }
 
 const AppAdminRouteChildren: AppAdminRouteChildren = {
+  AppAdminOrdersRoute: AppAdminOrdersRoute,
   AppAdminProductsRoute: AppAdminProductsRoute,
 }
 

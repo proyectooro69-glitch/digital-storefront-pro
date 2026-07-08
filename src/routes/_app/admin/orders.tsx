@@ -232,7 +232,8 @@ function AdminOrders() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              )
+              })}
             </div>
           )}
       </PageBody>
