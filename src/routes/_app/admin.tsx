@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from '@tanstack/react-router'
+import { createFileRoute, Link, Outlet, redirect, useLocation } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { blink } from '@/blink/client'
@@ -21,6 +21,9 @@ export const Route = createFileRoute('/_app/admin')({
 const CHART_COLORS = ['#2563EB', '#7C3AED', '#059669', '#D97706', '#DC2626', '#0891B2', '#4F46E5', '#BE185D']
 
 function AdminDashboard() {
+  const location = useLocation()
+  const isDashboard = location.pathname === '/admin'
+
   const { data: orders, isLoading: ordersLoading } = useQuery({
     queryKey: ['admin', 'orders'],
     queryFn: async () => {
@@ -129,21 +132,23 @@ function AdminDashboard() {
 
   return (
     <Page>
-      <PageHeader>
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
-            <Shield className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <PageTitle>Admin Dashboard</PageTitle>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Sales analytics, revenue tracking, and fiscal control
-            </p>
-          </div>
-        </div>
-      </PageHeader>
+      {isDashboard ? (
+        <>
+          <PageHeader>
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <Shield className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <PageTitle>Admin Dashboard</PageTitle>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Sales analytics, revenue tracking, and fiscal control
+                </p>
+              </div>
+            </div>
+          </PageHeader>
 
-      <PageBody>
+          <PageBody>
         {/* ── KPI Cards Row ── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {ordersLoading
@@ -369,6 +374,10 @@ function AdminDashboard() {
           </CardContent>
         </Card>
       </PageBody>
+        </>
+      ) : (
+        <Outlet />
+      )}
     </Page>
   )
 }
