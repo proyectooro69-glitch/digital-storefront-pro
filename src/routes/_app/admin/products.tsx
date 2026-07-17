@@ -57,9 +57,11 @@ function AdminProducts() {
       setDialogOpen(false)
       setEditingProduct(null)
     },
-    onError: () => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error('[AdminProducts] Save failed:', error)
       toast.error('Failed to save product', {
-        description: 'Something went wrong. Please try again.',
+        description: message || 'Something went wrong. Please try again.',
       })
     },
   })

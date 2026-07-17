@@ -2,6 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table'
 import { Button, Badge } from '@blinkdotnew/ui'
 import { Pencil, Trash2, Package } from 'lucide-react'
 import type { Product } from '@/types'
+import { toDirectImageUrl } from '@/lib/utils'
 
 export function createProductColumns(
   onEdit: (product: Product) => void,
@@ -15,7 +16,7 @@ export function createProductColumns(
         <div className="flex items-center gap-2.5 min-w-0">
           {row.original.cover_image ? (
             <img
-              src={row.original.cover_image}
+              src={toDirectImageUrl(row.original.cover_image)}
               alt=""
               className="h-8 w-8 rounded-md object-cover shrink-0 border border-border"
             />

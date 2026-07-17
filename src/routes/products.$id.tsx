@@ -5,6 +5,7 @@ import { blink } from '@/blink/client'
 import { Button, Badge, Input } from '@blinkdotnew/ui'
 import { ArrowLeft, ExternalLink, DollarSign, User, Mail, ShoppingCart } from 'lucide-react'
 import type { Product, Order } from '@/types'
+import { toDirectImageUrl } from '@/lib/utils'
 
 export const Route = createFileRoute('/products/$id')({
   head: ({ params }) => ({
@@ -149,7 +150,7 @@ function ProductDetail() {
             <div className="relative aspect-[16/10] rounded-2xl overflow-hidden border border-border bg-muted">
               {product.cover_image ? (
                 <img
-                  src={product.cover_image}
+                  src={toDirectImageUrl(product.cover_image)}
                   alt={product.title}
                   className="w-full h-full object-cover"
                 />

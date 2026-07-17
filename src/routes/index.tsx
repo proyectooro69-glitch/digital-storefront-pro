@@ -5,6 +5,7 @@ import { blink } from '@/blink/client'
 import { Button, Badge, Input } from '@blinkdotnew/ui'
 import { Store, Search, Package, Tag } from 'lucide-react'
 import type { Product } from '@/types'
+import { toDirectImageUrl } from '@/lib/utils'
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -205,7 +206,7 @@ function StorefrontHome() {
                   <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                     {product.cover_image ? (
                       <img
-                        src={product.cover_image}
+                        src={toDirectImageUrl(product.cover_image)}
                         alt={product.title}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"

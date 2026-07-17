@@ -5,7 +5,9 @@ import {
   Button, DialogFooter, Input, Textarea, Switch,
 } from '@blinkdotnew/ui'
 import { DollarSign, Link as LinkIcon, Image } from 'lucide-react'
+import { useMemo } from 'react'
 import type { Product } from '@/types'
+import { toDirectImageUrl } from '@/lib/utils'
 
 export const productSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -47,6 +49,9 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
       is_published: product ? product.is_published === 1 : false,
     },
   })
+
+  const coverImageRaw = form.watch('cover_image')
+  const coverImageSrc = useMemo(() => toDirectImageUrl(coverImageRaw || ''), [coverImageRaw])
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
@@ -140,11 +145,11 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
           <Image className="h-3 w-3" />
           Cover Image URL
         </label>
-        <Input {...form.register('cover_image')} placeholder="https://..." className="w-full" />
-        {form.watch('cover_image') && (
+        <Input {...form.register('cover_image')} placeholder="https://... (or Google Drive link)" className="w-full" />
+        {coverImageSrc && (
           <div className="mt-2 rounded-lg overflow-hidden border border-border w-32 h-24 bg-muted">
             <img
-              src={form.watch('cover_image')}
+              src={coverImageSrc}
               alt="Cover preview"
               className="w-full h-full object-cover"
               onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
