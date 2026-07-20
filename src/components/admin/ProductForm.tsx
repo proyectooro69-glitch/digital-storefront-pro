@@ -5,7 +5,7 @@ import {
   Button, DialogFooter, Input, Textarea, Switch,
 } from '@blinkdotnew/ui'
 import { DollarSign, Link as LinkIcon, Image } from 'lucide-react'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Product } from '@/types'
 import { toDirectImageUrl } from '@/lib/utils'
 
@@ -52,6 +52,7 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
 
   const coverImageRaw = form.watch('cover_image')
   const coverImageSrc = useMemo(() => toDirectImageUrl(coverImageRaw || ''), [coverImageRaw])
+  const [imageLoadFailed, setImageLoadFailed] = useState(false)
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
@@ -146,15 +147,20 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
           Cover Image URL
         </label>
         <Input {...form.register('cover_image')} placeholder="https://... (or Google Drive link)" className="w-full" />
-        {coverImageSrc && (
+        {coverImageSrc && !imageLoadFailed && (
           <div className="mt-2 rounded-lg overflow-hidden border border-border w-32 h-24 bg-muted">
             <img
               src={coverImageSrc}
               alt="Cover preview"
               className="w-full h-full object-cover"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+              onError={() => setImageLoadFailed(true)}
             />
           </div>
+        )}
+        {coverImageSrc && imageLoadFailed && (
+          <p className="text-xs text-muted-foreground mt-1">
+            Image could not be loaded. Check that the URL is a direct link to an image.
+          </p>
         )}
       </div>
 
