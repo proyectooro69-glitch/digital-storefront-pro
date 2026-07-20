@@ -5,7 +5,7 @@ import {
   Button, DialogFooter, Input, Textarea, Switch,
 } from '@blinkdotnew/ui'
 import { DollarSign, Link as LinkIcon, Image } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { Product } from '@/types'
 import { toDirectImageUrl } from '@/lib/utils'
 
@@ -53,6 +53,11 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
   const coverImageRaw = form.watch('cover_image')
   const coverImageSrc = useMemo(() => toDirectImageUrl(coverImageRaw || ''), [coverImageRaw])
   const [imageLoadFailed, setImageLoadFailed] = useState(false)
+
+  // Reset image error state when the URL changes
+  useEffect(() => {
+    setImageLoadFailed(false)
+  }, [coverImageRaw])
 
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">

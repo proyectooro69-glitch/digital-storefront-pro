@@ -166,6 +166,7 @@ function AdminProducts() {
           </DialogHeader>
 
           <ProductForm
+            key={editingProduct?.id ?? 'new'}
             product={editingProduct}
             isPending={saveMutation.isPending}
             onSubmit={(data) => saveMutation.mutate(data)}
