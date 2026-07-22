@@ -1,11 +1,9 @@
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import {
-  Button, DialogFooter, Input, Textarea, Switch,
-} from '@blinkdotnew/ui'
+import { Button, Input, Textarea, Switch } from '@blinkdotnew/ui'
 import { DollarSign, Link as LinkIcon, Image } from 'lucide-react'
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import type { Product } from '@/types'
 import { toDirectImageUrl } from '@/lib/utils'
 
@@ -33,14 +31,16 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductFormProps) {
+  const isEdit = product !== null
+
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
       title: product?.title ?? '',
       description: product?.description ?? '',
       category: product?.category ?? '',
-      price_usd: Number(product?.price_usd) ?? 0,
-      price_eur: Number(product?.price_eur) ?? 0,
+      price_usd: product?.price_usd != null ? Number(product.price_usd) : 0,
+      price_eur: product?.price_eur != null ? Number(product.price_eur) : 0,
       tropipay_url_usd: product?.tropipay_url_usd ?? '',
       tropipay_url_eur: product?.tropipay_url_eur ?? '',
       cover_image: product?.cover_image ?? '',
@@ -50,7 +50,9 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
     },
   })
 
-  const coverImageRaw = form.watch('cover_image')
+  // useWatch — safe, doesn't subscribe during render (unlike form.watch)
+  const isPublished = useWatch({ control: form.control, name: 'is_published' })
+  const coverImageRaw = useWatch({ control: form.control, name: 'cover_image' })
   const coverImageSrc = useMemo(() => toDirectImageUrl(coverImageRaw || ''), [coverImageRaw])
   const [imageLoadFailed, setImageLoadFailed] = useState(false)
 
@@ -59,8 +61,16 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
     setImageLoadFailed(false)
   }, [coverImageRaw])
 
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault()
+      form.handleSubmit(onSubmit)(e)
+    },
+    [form, onSubmit],
+  )
+
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
+    <form onSubmit={handleSubmit} className="space-y-4 mt-2">
       {/* Title */}
       <div className="space-y-1.5">
         <label className="text-sm font-medium text-foreground">
@@ -191,12 +201,13 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
           <p className="text-xs text-muted-foreground">Make this product visible to customers</p>
         </div>
         <Switch
-          checked={form.watch('is_published')}
+          checked={isPublished}
           onCheckedChange={(checked) => form.setValue('is_published', checked, { shouldValidate: true })}
         />
       </div>
 
-      <DialogFooter className="gap-2 pt-2">
+      {/* Footer — plain div, no Radix DialogFooter with Close */}
+      <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
@@ -206,13 +217,13 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
               <span className="animate-spin rounded-full h-3.5 w-3.5 border-2 border-primary-foreground border-t-transparent" />
               Saving...
             </>
-          ) : product ? (
+          ) : isEdit ? (
             'Update Product'
           ) : (
             'Create Product'
           )}
         </Button>
-      </DialogFooter>
+      </div>
     </form>
   )
 }

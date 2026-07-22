@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { blink } from '@/blink/client'
 import type { Product } from '@/types'
 import {
@@ -31,6 +31,13 @@ function AdminProducts() {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [deletingProduct, setDeletingProduct] = useState<Product | null>(null)
 
+  // Track dialog key so Radix fully remounts the portal on every open
+  const [dialogKey, setDialogKey] = useState(0)
+
+  // Ref to avoid stale closure in mutationFn
+  const editingProductRef = useRef<Product | null>(null)
+  editingProductRef.current = editingProduct
+
   const { data: products, isLoading } = useQuery({
     queryKey: ['admin', 'products'],
     queryFn: async () => {
@@ -39,23 +46,46 @@ function AdminProducts() {
     },
   })
 
+  const closeDialog = useCallback(() => {
+    // Only close if the dialog is actually open to avoid double-unmount
+    setDialogOpen(false)
+    // Delay clearing editingProduct to let the portal fully unmount first
+    setTimeout(() => {
+      setEditingProduct(null)
+    }, 0)
+  }, [])
+
+  const openCreateDialog = useCallback(() => {
+    setEditingProduct(null)
+    setDialogKey((k) => k + 1)
+    setDialogOpen(true)
+  }, [])
+
+  const openEditDialog = useCallback((product: Product) => {
+    setEditingProduct(product)
+    setDialogKey((k) => k + 1)
+    setDialogOpen(true)
+  }, [])
+
   const saveMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
       const payload = { ...data, is_published: data.is_published ? 1 : 0 }
-      if (editingProduct) {
-        return blink.db.table<Product>('products').update(editingProduct.id, payload)
+      // Read from ref to avoid stale closure
+      const current = editingProductRef.current
+      if (current) {
+        return blink.db.table<Product>('products').update(current.id, payload)
       }
       return blink.db.table<Product>('products').create(payload)
     },
     onSuccess: () => {
-      toast.success(editingProduct ? 'Product updated' : 'Product created', {
-        description: editingProduct
+      const isEdit = editingProductRef.current !== null
+      toast.success(isEdit ? 'Product updated' : 'Product created', {
+        description: isEdit
           ? 'The product has been updated successfully.'
           : 'The product has been added to your catalog.',
       })
       queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
-      setDialogOpen(false)
-      setEditingProduct(null)
+      closeDialog()
     },
     onError: (error: unknown) => {
       const message = error instanceof Error ? error.message : String(error)
@@ -76,26 +106,21 @@ function AdminProducts() {
       setDeleteConfirmOpen(false)
       setDeletingProduct(null)
     },
-    onError: () => {
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : String(error)
+      console.error('[AdminProducts] Delete failed:', error)
       toast.error('Failed to delete product', {
-        description: 'Something went wrong. Please try again.',
+        description: message || 'Something went wrong. Please try again.',
       })
     },
   })
 
   const columns = useMemo(
-    () =>
-      createProductColumns(
-        (product) => {
-          setEditingProduct(product)
-          setDialogOpen(true)
-        },
-        (product) => {
-          setDeletingProduct(product)
-          setDeleteConfirmOpen(true)
-        },
-      ),
-    [],
+    () => createProductColumns(openEditDialog, (product) => {
+      setDeletingProduct(product)
+      setDeleteConfirmOpen(true)
+    }),
+    [openEditDialog],
   )
 
   const safeData = Array.isArray(products) ? products : []
@@ -116,10 +141,7 @@ function AdminProducts() {
         </div>
         <PageActions>
           <Button
-            onClick={() => {
-              setEditingProduct(null)
-              setDialogOpen(true)
-            }}
+            onClick={openCreateDialog}
             className="gap-2 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
           >
             <Plus className="h-4 w-4" />
@@ -142,10 +164,7 @@ function AdminProducts() {
             description="Add your first product to start selling."
             action={{
               label: 'Add Product',
-              onClick: () => {
-                setEditingProduct(null)
-                setDialogOpen(true)
-              },
+              onClick: openCreateDialog,
             }}
           />
         ) : (
@@ -154,7 +173,7 @@ function AdminProducts() {
       </PageBody>
 
       {/* ── Create / Edit Dialog ── */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog key={dialogKey} open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-lg max-h-[90dvh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingProduct ? 'Edit Product' : 'Add Product'}</DialogTitle>
@@ -166,14 +185,11 @@ function AdminProducts() {
           </DialogHeader>
 
           <ProductForm
-            key={editingProduct?.id ?? 'new'}
+            key={dialogKey}
             product={editingProduct}
             isPending={saveMutation.isPending}
             onSubmit={(data) => saveMutation.mutate(data)}
-            onCancel={() => {
-              setDialogOpen(false)
-              setEditingProduct(null)
-            }}
+            onCancel={closeDialog}
           />
         </DialogContent>
       </Dialog>
