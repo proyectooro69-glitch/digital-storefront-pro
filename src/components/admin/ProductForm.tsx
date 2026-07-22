@@ -1,9 +1,9 @@
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Button, Input, Textarea, Switch } from '@blinkdotnew/ui'
-import { DollarSign, Link as LinkIcon, Image } from 'lucide-react'
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { Button, Input, Textarea } from '@blinkdotnew/ui'
+import { DollarSign, Link as LinkIcon, Image, ImageOff } from 'lucide-react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import type { Product } from '@/types'
 import { toDirectImageUrl } from '@/lib/utils'
 
@@ -32,6 +32,13 @@ interface ProductFormProps {
 
 export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductFormProps) {
   const isEdit = product !== null
+  const mountedRef = useRef(true)
+
+  // Track mounted state to prevent any setState after unmount
+  useEffect(() => {
+    mountedRef.current = true
+    return () => { mountedRef.current = false }
+  }, [])
 
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
@@ -50,21 +57,41 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
     },
   })
 
-  // useWatch — safe, doesn't subscribe during render (unlike form.watch)
-  const isPublished = useWatch({ control: form.control, name: 'is_published' })
-  const coverImageRaw = useWatch({ control: form.control, name: 'cover_image' })
-  const coverImageSrc = useMemo(() => toDirectImageUrl(coverImageRaw || ''), [coverImageRaw])
-  const [imageLoadFailed, setImageLoadFailed] = useState(false)
+  // Controlled state for the toggle — avoids Radix Switch DOM manipulation inside portal
+  const [published, setPublished] = useState(product ? product.is_published === 1 : false)
 
-  // Reset image error state when the URL changes
+  const togglePublished = useCallback((checked: boolean) => {
+    setPublished(checked)
+    form.setValue('is_published', checked, { shouldValidate: false })
+  }, [form])
+
+  // Cover image — read via getValues at submit time, use local state for preview
+  const [coverInput, setCoverInput] = useState(form.getValues('cover_image') || '')
+  const [imgKey, setImgKey] = useState(0)
+  const [imgError, setImgError] = useState(false)
+
+  const coverImageSrc = useMemo(() => toDirectImageUrl(coverInput), [coverInput])
+
+  // Reset error when cover URL changes
   useEffect(() => {
-    setImageLoadFailed(false)
-  }, [coverImageRaw])
+    setImgError(false)
+    setImgKey((k) => k + 1)
+  }, [coverInput])
+
+  const handleCoverChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setCoverInput(value)
+    form.setValue('cover_image', value, { shouldValidate: false })
+  }, [form])
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault()
-      form.handleSubmit(onSubmit)(e)
+      try {
+        form.handleSubmit(onSubmit)(e)
+      } catch (err) {
+        console.error('[ProductForm] Submit error:', err)
+      }
     },
     [form, onSubmit],
   )
@@ -161,21 +188,31 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
           <Image className="h-3 w-3" />
           Cover Image URL
         </label>
-        <Input {...form.register('cover_image')} placeholder="https://... (or Google Drive link)" className="w-full" />
-        {coverImageSrc && !imageLoadFailed && (
+        <Input
+          name="cover_image"
+          value={coverInput}
+          onChange={handleCoverChange}
+          placeholder="https://... (or Google Drive link)"
+          className="w-full"
+        />
+        {coverImageSrc && !imgError && (
           <div className="mt-2 rounded-lg overflow-hidden border border-border w-32 h-24 bg-muted">
             <img
+              key={imgKey}
               src={coverImageSrc}
               alt="Cover preview"
               className="w-full h-full object-cover"
-              onError={() => setImageLoadFailed(true)}
+              onError={() => { if (mountedRef.current) setImgError(true) }}
             />
           </div>
         )}
-        {coverImageSrc && imageLoadFailed && (
-          <p className="text-xs text-muted-foreground mt-1">
-            Image could not be loaded. Check that the URL is a direct link to an image.
-          </p>
+        {coverImageSrc && imgError && (
+          <div className="flex items-center gap-1.5 mt-1">
+            <ImageOff className="h-3 w-3 text-muted-foreground shrink-0" />
+            <p className="text-xs text-muted-foreground">
+              Image could not be loaded. Check that the URL is a direct link to an image.
+            </p>
+          </div>
         )}
       </div>
 
@@ -194,16 +231,24 @@ export function ProductForm({ product, isPending, onSubmit, onCancel }: ProductF
         </div>
       </div>
 
-      {/* Published toggle */}
+      {/* Published toggle — native checkbox, no Radix Switch */}
       <div className="flex items-center justify-between rounded-lg border border-border p-3">
         <div>
-          <label className="text-sm font-medium text-foreground">Published</label>
+          <label htmlFor="is_published_toggle" className="text-sm font-medium text-foreground cursor-pointer">
+            Published
+          </label>
           <p className="text-xs text-muted-foreground">Make this product visible to customers</p>
         </div>
-        <Switch
-          checked={isPublished}
-          onCheckedChange={(checked) => form.setValue('is_published', checked, { shouldValidate: true })}
-        />
+        <label className="relative inline-flex items-center cursor-pointer">
+          <input
+            id="is_published_toggle"
+            type="checkbox"
+            className="sr-only peer"
+            checked={published}
+            onChange={(e) => togglePublished(e.target.checked)}
+          />
+          <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-primary peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring" />
+        </label>
       </div>
 
       {/* Footer — plain div, no Radix DialogFooter with Close */}

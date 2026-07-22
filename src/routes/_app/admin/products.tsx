@@ -10,6 +10,7 @@ import {
 } from '@blinkdotnew/ui'
 import { Plus, Package } from 'lucide-react'
 import { isAdminEmail } from '@/config/admin'
+import { ErrorBoundary } from '@/components/admin/ErrorBoundary'
 import { ProductForm, type ProductFormData } from '@/components/admin/ProductForm'
 import { ProductDeleteDialog } from '@/components/admin/ProductDeleteDialog'
 import { createProductColumns } from '@/components/admin/ProductColumns'
@@ -184,13 +185,15 @@ function AdminProducts() {
             </DialogDescription>
           </DialogHeader>
 
-          <ProductForm
-            key={dialogKey}
-            product={editingProduct}
-            isPending={saveMutation.isPending}
-            onSubmit={(data) => saveMutation.mutate(data)}
-            onCancel={closeDialog}
-          />
+          <ErrorBoundary onReset={() => setDialogKey((k) => k + 1)}>
+            <ProductForm
+              key={dialogKey}
+              product={editingProduct}
+              isPending={saveMutation.isPending}
+              onSubmit={(data) => saveMutation.mutate(data)}
+              onCancel={closeDialog}
+            />
+          </ErrorBoundary>
         </DialogContent>
       </Dialog>
 
